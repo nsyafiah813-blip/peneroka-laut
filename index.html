@@ -1,0 +1,542 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Peneroka Laut Cilik - 5 Tahun</title>
+  <style>
+    :root {
+      --primary: #0077b6;
+      --secondary: #ffb703;
+      --accent: #fb8500;
+      --bg: #caf0f8;
+      --success: #2ec4b6;
+      --danger: #e63946;
+      --text: #03045e;
+    }
+
+    * {
+      box-sizing: border-box;
+      font-family: 'Comic Sans MS', 'Chalkboard SE', 'Fredoka', cursive, sans-serif;
+      margin: 0;
+      padding: 0;
+      user-select: none;
+    }
+
+    body {
+      background: linear-gradient(180deg, #90e0ef 0%, #0077b6 100%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: var(--text);
+      padding: 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 860px;
+      background: #ffffff;
+      border-radius: 28px;
+      box-shadow: 0 16px 36px rgba(0,0,0,0.25);
+      border: 6px solid #ffffff;
+      min-height: 640px;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Butang Kawalan Muzik Latar */
+    .music-toggle-btn {
+      position: absolute;
+      top: 15px;
+      right: 15px;
+      background: #ffffff;
+      border: 3px solid var(--secondary);
+      border-radius: 50px;
+      padding: 8px 16px;
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--text);
+      cursor: pointer;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+      z-index: 100;
+      transition: 0.2s;
+    }
+
+    .music-toggle-btn:hover {
+      background: #fff8e1;
+      transform: scale(1.05);
+    }
+
+    .screen {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 30px;
+      text-align: center;
+      flex: 1;
+    }
+
+    .screen.active {
+      display: flex;
+      animation: popIn 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes popIn {
+      from { opacity: 0; transform: scale(0.96); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    h1 { font-size: 2.2rem; color: #023e8a; margin-bottom: 8px; }
+    h2 { font-size: 1.6rem; color: #0077b6; margin-bottom: 12px; }
+    p { font-size: 1.2rem; color: #495057; margin-bottom: 15px; }
+
+    .btn {
+      background: var(--secondary);
+      color: #03045e;
+      font-size: 1.2rem;
+      font-weight: 800;
+      border: none;
+      border-radius: 50px;
+      padding: 12px 28px;
+      cursor: pointer;
+      box-shadow: 0 5px 0 #fb8500;
+      transition: 0.1s;
+      margin: 8px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn:active {
+      transform: translateY(3px);
+      box-shadow: 0 2px 0 #fb8500;
+    }
+
+    .btn-action {
+      background: var(--success);
+      color: #ffffff;
+      box-shadow: 0 5px 0 #1f8a80;
+    }
+    .btn-action:active { box-shadow: 0 2px 0 #1f8a80; }
+
+    .menu-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 15px;
+      width: 100%;
+      max-width: 700px;
+      margin-top: 15px;
+    }
+
+    .card-display {
+      background: #e0f2fe;
+      border-radius: 20px;
+      padding: 20px;
+      width: 100%;
+      max-width: 500px;
+      border: 4px dashed #0284c7;
+      margin-bottom: 15px;
+    }
+
+    .animal-emoji {
+      font-size: 6rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+      display: inline-block;
+    }
+    .animal-emoji:active { transform: scale(1.15); }
+
+    .grid-options {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+      width: 100%;
+      max-width: 500px;
+      margin-top: 10px;
+    }
+
+    .choice-card {
+      background: #fef08a;
+      border: 4px solid #facc15;
+      border-radius: 18px;
+      padding: 15px;
+      font-size: 1.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 90px;
+    }
+
+    .choice-card:active {
+      transform: scale(0.96);
+      background: #fde047;
+    }
+
+    .feedback-msg {
+      font-size: 1.4rem;
+      font-weight: bold;
+      min-height: 35px;
+      margin-top: 12px;
+    }
+
+    .info-list {
+      text-align: left;
+      background: #f0fdf4;
+      padding: 20px 25px 20px 45px;
+      border-radius: 15px;
+      font-size: 1.1rem;
+      color: #166534;
+      border-left: 6px solid #22c55e;
+      margin-bottom: 20px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    
+    <!-- Butang Kawalan Muzik Latar -->
+    <button id="bgm-btn" class="music-toggle-btn" onclick="toggleBGM()">🎵 Muzik: MATI</button>
+
+    <!-- 1. HALAMAN UTAMA -->
+    <section id="screen-home" class="screen active">
+      <div style="font-size: 4.8rem;">🐬 🌊 🦈</div>
+      <h1>Peneroka Laut Cilik</h1>
+      <p>Aplikasi Pembelajaran & Kemahiran Kognitif (Umur 5 Tahun)</p>
+      
+      <div>
+        <button class="btn btn-action" onclick="showScreen('screen-menu')">▶ Mulakan Kembara</button>
+        <button class="btn" onclick="showScreen('screen-objectives')">🎯 Objektif</button>
+      </div>
+    </section>
+
+    <!-- 2. OBJEKTIF PEMBELAJARAN -->
+    <section id="screen-objectives" class="screen">
+      <h2>🎯 Objektif Pembelajaran (5 Tahun)</h2>
+      <ul class="info-list">
+        <li><b>Literasi Awal:</b> Mengecam huruf awal bagi ejaan nama haiwan laut.</li>
+        <li><b>Matematik Awal:</b> Membandingkan kuantiti (konsep 'lebih banyak' objek).</li>
+        <li><b>Sains Awal:</b> Mengenal pasti ciri fizikal unik dan fakta fauna marin.</li>
+      </ul>
+      <button class="btn" onclick="showScreen('screen-home')">⬅ Kembali</button>
+      <button class="btn btn-action" onclick="showScreen('screen-menu')">Terus ke Modul 🚀</button>
+    </section>
+
+    <!-- 3. MENU UTAMA AKTIVITI -->
+    <section id="screen-menu" class="screen">
+      <h2>Pilih Cabaran Minda 💡</h2>
+      <p>Pilih aktiviti yang adik ingin cuba:</p>
+
+      <div class="menu-grid">
+        <button class="btn" style="background:#38bdf8;" onclick="showScreen('screen-learn')">📖 1. Ensiklopedia Laut</button>
+        <button class="btn" style="background:#f472b6;" onclick="startPhonicsQuiz()">🔤 2. Huruf Awalan</button>
+        <button class="btn" style="background:#fb923c;" onclick="startCompareQuiz()">⚖️ 3. Banding Kuantiti</button>
+        <button class="btn" style="background:#4ade80;" onclick="startScienceQuiz()">🔬 4. Fakta & Ciri</button>
+      </div>
+
+      <div style="margin-top: 25px;">
+        <button class="btn" onclick="showScreen('screen-home')">🏠 Ke Menu Utama</button>
+      </div>
+    </section>
+
+    <!-- 4. ENSIKLOPEDIA LAUT -->
+    <section id="screen-learn" class="screen">
+      <h2>Kenali Haiwan Laut 🌊</h2>
+      <div class="card-display">
+        <div id="learn-emoji" class="animal-emoji">🐬</div>
+        <div id="learn-title" style="font-size:2rem; font-weight:900; color:#0369a1;">LUMBA-LUMBA</div>
+        <div id="learn-spell" style="font-size:1.3rem; letter-spacing:3px; color:#e11d48; margin:5px 0;">L-U-M-B-A</div>
+        <p id="learn-fact" style="font-size:1.15rem; color:#334155;">"Saya bukan ikan, saya mamalia yang bernafas melalui lubang atas kepala!"</p>
+      </div>
+      <div>
+        <button class="btn" onclick="prevLearn()">◀ Sebelumnya</button>
+        <button class="btn" onclick="nextLearn()">Seterusnya ▶</button>
+      </div>
+      <button class="btn btn-action" style="margin-top:15px;" onclick="showScreen('screen-menu')">Selesai 🏁</button>
+    </section>
+
+    <!-- 5. AKTIVITI 1: HURUF AWALAN -->
+    <section id="screen-act1" class="screen">
+      <h2>🔤 Apakah huruf pertama bagi nama ini?</h2>
+      <div id="act1-emoji" style="font-size: 5rem;">🦈</div>
+      <div id="act1-word" style="font-size: 2rem; font-weight: bold; color: #0284c7; margin-bottom: 10px;">_ E R U N G</div>
+      <div class="grid-options" id="act1-options"></div>
+      <div id="act1-feedback" class="feedback-msg"></div>
+      <button id="act1-next" class="btn btn-action" style="display:none;" onclick="nextAct1()">Soalan Seterusnya ➡</button>
+      <button class="btn" style="margin-top:10px;" onclick="showScreen('screen-menu')">Menu</button>
+    </section>
+
+    <!-- 6. AKTIVITI 2: BANDING KUANTITI -->
+    <section id="screen-act2" class="screen">
+      <h2>⚖️ Kumpulan mana yang LEBIH BANYAK?</h2>
+      <p>Kira kedua-dua belah, kemudian sentuh kotak yang paling banyak!</p>
+      <div style="display:flex; justify-content:center; gap:20px; width:100%; max-width:550px;">
+        <div id="box-a" class="choice-card" style="flex:1; flex-direction:column; min-height:130px; font-size:2rem;" onclick="checkCompare('A')"></div>
+        <div id="box-b" class="choice-card" style="flex:1; flex-direction:column; min-height:130px; font-size:2rem;" onclick="checkCompare('B')"></div>
+      </div>
+      <div id="act2-feedback" class="feedback-msg"></div>
+      <button id="act2-next" class="btn btn-action" style="display:none;" onclick="nextAct2()">Banding Lagi ➡</button>
+      <button class="btn" style="margin-top:10px;" onclick="showScreen('screen-menu')">Menu</button>
+    </section>
+
+    <!-- 7. AKTIVITI 3: FAKTA & CIRI -->
+    <section id="screen-act3" class="screen">
+      <h2>🔬 Kuiz Minda Cilik</h2>
+      <p id="act3-question" style="font-size:1.3rem; font-weight:bold; color:#0f766e;"></p>
+      <div class="grid-options" id="act3-options"></div>
+      <div id="act3-feedback" class="feedback-msg"></div>
+      <button id="act3-next" class="btn btn-action" style="display:none;" onclick="nextAct3()">Soalan Seterusnya ➡</button>
+      <button class="btn" style="margin-top:10px;" onclick="showScreen('screen-menu')">Menu</button>
+    </section>
+
+    <!-- 8. RUMUSAN & KEJAYAAN -->
+    <section id="screen-summary" class="screen">
+      <div style="font-size: 5rem;">🎓 🐬 🌟</div>
+      <h1>Peneroka Marin Berjaya!</h1>
+      <p>Tahniah! Adik telah menyelesaikan semua latihan dengan cemerlang!</p>
+      <div class="info-list" style="text-align:center;">
+        Adik menguasai kemahiran literasi awalan, perbandingan kuantiti, dan fakta hidupan laut!
+      </div>
+      <button class="btn btn-action" onclick="showScreen('screen-menu')">Main Lagi 🔄</button>
+    </section>
+
+  </div>
+
+  <script>
+    // --- ENJIN MUZIK LATAR SYNTHESIZER (WEB AUDIO API) ---
+    let audioCtx = null;
+    let bgmInterval = null;
+    let isBgmPlaying = false;
+
+    // Melodi ceria berulang (frekuensi Hertz)
+    const melodyNotes = [
+      261.63, 293.66, 329.63, 349.23, 392.00, 329.63, 392.00, 
+      349.23, 329.63, 293.66, 261.63, 329.63, 293.66, 261.63
+    ];
+    let noteIndex = 0;
+
+    function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      }
+    }
+
+    function playBgmTone() {
+      if (!isBgmPlaying || !audioCtx) return;
+      
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = 'triangle'; // Nada lembut dan mesra kanak-kanak
+      osc.frequency.setValueAtTime(melodyNotes[noteIndex], audioCtx.currentTime);
+
+      gain.gain.setValueAtTime(0.04, audioCtx.currentTime); // Kelantangan muzik latar perlahan
+      gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.35);
+
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.35);
+
+      noteIndex = (noteIndex + 1) % melodyNotes.length;
+    }
+
+    function toggleBGM() {
+      initAudio();
+      if (audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+
+      const btn = document.getElementById('bgm-btn');
+      if (isBgmPlaying) {
+        clearInterval(bgmInterval);
+        isBgmPlaying = false;
+        btn.innerText = "🔇 Muzik: MATI";
+        btn.style.background = "#ffffff";
+      } else {
+        isBgmPlaying = true;
+        btn.innerText = "🎵 Muzik: HIDUP";
+        btn.style.background = "#c8e6c9";
+        bgmInterval = setInterval(playBgmTone, 400);
+      }
+    }
+
+    // --- DATA KANDUNGAN PEMBELAJARAN ---
+    const seaData = [
+      { name: "LUMBA-LUMBA", letter: "L", emoji: "🐬", fact: "Lumba-lumba adalah mamalia pintar yang bernafas melalui lubang atas kepala.", q: "Siapa mamalia bijak yang bernafas guna lubang di atas kepala?" },
+      { name: "JERUNG", letter: "J", emoji: "🦈", fact: "Jerung mempunyai deria bau yang sangat tajam di dalam air.", q: "Haiwan pemangsa laut manakah yang mempunyai deria bau yang kuat?" },
+      { name: "SOTONG KURITA", letter: "S", emoji: "🐙", fact: "Sotong kurita ada 3 biji jantung dan darah berwarna biru!", q: "Haiwan manakah yang unik kerana ada 3 jantung dan darah biru?" },
+      { name: "KUDA LAUT", letter: "K", emoji: "🫧", fact: "Kuda laut jantan membawa telur dan menjaga anaknya di dalam kantung.", q: "Haiwan manakah yang si bapa menjaga anak di dalam kantungnya?" }
+    ];
+
+    let learnIdx = 0;
+
+    function showScreen(screenId) {
+      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+      document.getElementById(screenId).classList.add('active');
+      if (screenId === 'screen-learn') updateLearn();
+    }
+
+    // --- ENSIKLOPEDIA ---
+    function updateLearn() {
+      const item = seaData[learnIdx];
+      document.getElementById('learn-emoji').innerText = item.emoji;
+      document.getElementById('learn-title').innerText = item.name;
+      document.getElementById('learn-spell').innerText = `Huruf Awal: [ ${item.letter} ]`;
+      document.getElementById('learn-fact').innerText = `"${item.fact}"`;
+    }
+
+    function nextLearn() {
+      learnIdx = (learnIdx + 1) % seaData.length;
+      updateLearn();
+    }
+
+    function prevLearn() {
+      learnIdx = (learnIdx - 1 + seaData.length) % seaData.length;
+      updateLearn();
+    }
+
+    // --- AKTIVITI 1: HURUF AWALAN ---
+    let act1Target = null;
+    let act1Round = 0;
+
+    function startPhonicsQuiz() {
+      act1Round = 0;
+      showScreen('screen-act1');
+      loadPhonicsQ();
+    }
+
+    function loadPhonicsQ() {
+      document.getElementById('act1-feedback').innerText = '';
+      document.getElementById('act1-next').style.display = 'none';
+
+      act1Target = seaData[Math.floor(Math.random() * seaData.length)];
+      document.getElementById('act1-emoji').innerText = act1Target.emoji;
+      document.getElementById('act1-word').innerText = `_ ${act1Target.name.substring(1)}`;
+
+      const choices = [act1Target.letter];
+      const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+      while (choices.length < 4) {
+        let randLetter = alphabet[Math.floor(Math.random() * alphabet.length)];
+        if (!choices.includes(randLetter)) choices.push(randLetter);
+      }
+      choices.sort(() => 0.5 - Math.random());
+
+      const container = document.getElementById('act1-options');
+      container.innerHTML = '';
+      choices.forEach(l => {
+        const btn = document.createElement('div');
+        btn.className = 'choice-card';
+        btn.innerText = l;
+        btn.onclick = () => {
+          if (l === act1Target.letter) {
+            document.getElementById('act1-feedback').innerHTML = "<span style='color:var(--success);'>Bijak! Huruf yang tepat! 🌟</span>";
+            act1Round++;
+            document.getElementById('act1-next').style.display = 'inline-block';
+          } else {
+            document.getElementById('act1-feedback').innerHTML = "<span style='color:var(--danger);'>Bukan, cuba teka huruf lain!</span>";
+          }
+        };
+        container.appendChild(btn);
+      });
+    }
+
+    function nextAct1() {
+      if (act1Round >= 3) showScreen('screen-summary');
+      else loadPhonicsQ();
+    }
+
+    // --- AKTIVITI 2: BANDING KUANTITI ---
+    let countA = 0, countB = 0;
+    let act2Round = 0;
+
+    function startCompareQuiz() {
+      act2Round = 0;
+      showScreen('screen-act2');
+      loadCompareQ();
+    }
+
+    function loadCompareQ() {
+      document.getElementById('act2-feedback').innerText = '';
+      document.getElementById('act2-next').style.display = 'none';
+
+      countA = Math.floor(Math.random() * 5) + 1;
+      countB = Math.floor(Math.random() * 5) + 1;
+      while (countA === countB) {
+        countB = Math.floor(Math.random() * 5) + 1;
+      }
+
+      document.getElementById('box-a').innerText = "🐟 ".repeat(countA);
+      document.getElementById('box-b').innerText = "🦀 ".repeat(countB);
+    }
+
+    function checkCompare(choice) {
+      const correct = (countA > countB) ? 'A' : 'B';
+      if (choice === correct) {
+        document.getElementById('act2-feedback').innerHTML = "<span style='color:var(--success);'>Hebat! Pilihan tepat dan lebih banyak! 🎉</span>";
+        act2Round++;
+        document.getElementById('act2-next').style.display = 'inline-block';
+      } else {
+        document.getElementById('act2-feedback').innerHTML = "<span style='color:var(--danger);'>Kurang tepat, cuba kira semula bilangan emoji!</span>";
+      }
+    }
+
+    function nextAct2() {
+      if (act2Round >= 3) showScreen('screen-summary');
+      else loadCompareQ();
+    }
+
+    // --- AKTIVITI 3: FAKTA & CIRI ---
+    let act3Target = null;
+    let act3Round = 0;
+
+    function startScienceQuiz() {
+      act3Round = 0;
+      showScreen('screen-act3');
+      loadScienceQ();
+    }
+
+    function loadScienceQ() {
+      document.getElementById('act3-feedback').innerText = '';
+      document.getElementById('act3-next').style.display = 'none';
+
+      act3Target = seaData[Math.floor(Math.random() * seaData.length)];
+      document.getElementById('act3-question').innerText = act3Target.q;
+
+      const shuffled = [...seaData].sort(() => 0.5 - Math.random());
+      const container = document.getElementById('act3-options');
+      container.innerHTML = '';
+
+      shuffled.forEach(item => {
+        const div = document.createElement('div');
+        div.className = 'choice-card';
+        div.style.fontSize = '1.3rem';
+        div.innerHTML = `${item.emoji} <br> ${item.name}`;
+        div.onclick = () => {
+          if (item.name === act3Target.name) {
+            document.getElementById('act3-feedback').innerHTML = "<span style='color:var(--success);'>Tepat Sekali! Jawapan Betul! 🐬</span>";
+            act3Round++;
+            document.getElementById('act3-next').style.display = 'inline-block';
+          } else {
+            document.getElementById('act3-feedback').innerHTML = "<span style='color:var(--danger);'>Bukan yang ini, cuba baca ciri-cirinya semula!</span>";
+          }
+        };
+        container.appendChild(div);
+      });
+    }
+
+    function nextAct3() {
+      if (act3Round >= 3) showScreen('screen-summary');
+      else loadScienceQ();
+    }
+  </script>
+</body>
+</html>
